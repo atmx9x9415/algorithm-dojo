@@ -1,0 +1,47 @@
+<%- include('../partials/header', { title: (editing ? '编辑题解' : '添加题解') }) %>
+<section class="section"><div class="container">
+<nav class="breadcrumb">
+  <a href="/henshin/dashboard">管理面板</a> <span>/</span>
+  <a href="/problems/<%= problem.id %>"><%= problem.title %></a> <span>/</span>
+  <span class="current"><%= editing ? '编辑题解' : '添加题解' %></span>
+</nav>
+
+<div class="page-header"><h1 class="page-title"><%= editing ? '编辑题解' : '添加题解' %></h1><p class="page-desc">题目：<%= problem.title %></p></div>
+
+<% if (typeof error !== 'undefined' && error) { %><div class="alert alert-error"><%= error %></div><% } %>
+
+<form method="POST" action="/henshin/<%= editing ? 'solutions/' + solution.id : 'problems/' + problem.id + '/solutions' %>" class="problem-edit-form">
+
+  <div class="form-step">
+    <div class="step-header"><span class="step-number">1</span><h2>语言选择</h2></div>
+    <div class="form-group" style="max-width:300px;">
+      <select name="language" class="form-input" required>
+        <% const langs = ['C++', 'Python', 'Java', 'JavaScript']; %>
+        <% const curLang = editing ? solution.language : (typeof values !== 'undefined' && values.language ? values.language : 'C++'); %>
+        <% langs.forEach(function(l) { %><option value="<%= l %>" <%= curLang === l ? 'selected' : '' %>><%= l %></option><% }); %>
+      </select>
+    </div>
+  </div>
+
+  <div class="form-step">
+    <div class="step-header"><span class="step-number">2</span><h2>思路讲解</h2></div>
+    <p class="step-hint">支持 Markdown 格式</p>
+    <div class="form-group">
+      <textarea name="explanation" class="form-input form-textarea form-textarea-lg" rows="8" placeholder="## 解题思路&#10;&#10;1. 首先分析问题...&#10;&#10;## 复杂度分析&#10;&#10;- 时间复杂度: O(n)&#10;- 空间复杂度: O(1)" required><%= editing ? solution.explanation : (typeof values !== 'undefined' && values.explanation ? values.explanation : '') %></textarea>
+    </div>
+  </div>
+
+  <div class="form-step">
+    <div class="step-header"><span class="step-number">3</span><h2>完整代码</h2></div>
+    <div class="form-group">
+      <textarea name="code" class="form-input form-textarea code-textarea form-textarea-lg" rows="15" placeholder="// 粘贴完整可运行代码..." required><%= editing ? solution.code : (typeof values !== 'undefined' && values.code ? values.code : '') %></textarea>
+    </div>
+  </div>
+
+  <div class="form-actions form-actions-sticky">
+    <a href="/problems/<%= problem.id %>" class="btn btn-outline">取消</a>
+    <button type="submit" class="btn btn-primary btn-lg"><%= editing ? '保存修改' : '发布题解' %></button>
+  </div>
+</form>
+</div></section>
+<%- include('../partials/footer') %>

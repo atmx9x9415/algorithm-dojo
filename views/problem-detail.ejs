@@ -1,0 +1,59 @@
+<%- include('partials/header', { title: problem.title }) %>
+<section class="section"><div class="container">
+<nav class="breadcrumb"><a href="/">首页</a> <span>/</span> <a href="/problems">题库</a> <span>/</span> <span class="current"><%= problem.title %></span></nav>
+
+<div class="problem-header">
+  <div class="problem-header-top">
+    <h1 class="problem-title"><%= problem.title %></h1>
+    <span class="difficulty-badge difficulty-<%= problem.difficulty.toLowerCase() %> difficulty-lg"><%= problem.difficulty === 'Easy' ? '简单' : problem.difficulty === 'Medium' ? '中等' : '困难' %></span>
+  </div>
+  <% if (problem.source) { %><p class="problem-source">来源：<%= problem.source %></p><% } %>
+  <div class="problem-tags">
+    <% const tNames = problem.tag_names || []; const tColors = problem.tag_colors || []; %>
+    <% for (let i = 0; i < tNames.length; i++) { %>
+    <a href="/tags/<%= encodeURIComponent(tNames[i]) %>" class="tag" style="background:<%= tColors[i] %>20;color:<%= tColors[i] %>;border:1px solid <%= tColors[i] %>40;"><%= tNames[i] %></a>
+    <% } %>
+  </div>
+  <p class="problem-author">贡献者：<%= problem.author_email || '未知' %></p>
+</div>
+
+<div class="problem-body">
+  <div class="problem-description">
+    <h2>题目描述</h2>
+    <div class="markdown-content"><%- marked.parse(problem.description) %></div>
+  </div>
+</div>
+
+<div class="solutions-section">
+  <h2 class="solutions-title">题解</h2>
+  <% if (problem.solutions.length === 0) { %>
+  <div class="empty-state"><span class="empty-icon">📝</span><p>暂无题解</p></div>
+  <% } else { %>
+  <% const languages = [...new Set(problem.solutions.map(function(s) { return s.language; }))]; %>
+  <div class="language-selector">
+    <span class="lang-label">选择语言：</span>
+    <div class="lang-buttons">
+      <% languages.forEach(function(lang) { %>
+      <a href="/problems/<%= problem.id %>?lang=<%= encodeURIComponent(lang) %>" class="lang-btn <%= lang === (typeof selectedLang !== 'undefined' ? selectedLang : languages[0]) ? 'lang-active' : '' %>">
+        <% const icons = { 'C++': '⚡', 'Python': '🐍', 'Java': '☕', 'JavaScript': '💛' }; %><%= icons[lang] || '💻' %> <%= lang %>
+      </a>
+      <% }); %>
+    </div>
+  </div>
+  <% const active = problem.solutions.find(function(s) { return s.language === (typeof selectedLang !== 'undefined' ? selectedLang : languages[0]); }) || problem.solutions[0]; %>
+  <div class="solution-card">
+    <div class="solution-meta">
+      <span class="solution-lang"><%= active.language %></span>
+      <span><%= active.author_email || '' %> · <%= active.updated_at || active.created_at %></span>
+    </div>
+    <div class="solution-explanation"><h3>思路讲解</h3><div class="markdown-content"><%- marked.parse(active.explanation) %></div></div>
+    <div class="solution-code">
+      <div class="code-header"><h3>完整代码</h3><button class="btn btn-sm btn-outline copy-btn" onclick="var t=this;navigator.clipboard.writeText(this.getAttribute('data-code')).then(function(){t.textContent='已复制!';setTimeout(function(){t.textContent='复制代码'},2000)})" data-code="<%= active.code.replace(/"/g, '&quot;').replace(/\n/g, '\\n') %>">复制代码</button></div>
+      <pre><code class="language-<%= active.language.toLowerCase() %>"><%= active.code %></code></pre>
+    </div>
+  </div>
+  <% } %>
+</div>
+<div class="back-nav"><a href="/problems" class="btn btn-outline">&larr; 返回题库</a></div>
+</div></section>
+<%- include('partials/footer') %>

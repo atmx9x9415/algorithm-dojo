@@ -1,0 +1,78 @@
+<%- include('partials/header', { title: '首页' }) %>
+
+<section class="hero">
+  <div class="hero-content">
+    <h1 class="hero-title">算法道场</h1>
+    <p class="hero-subtitle">按算法标签系统学习，从入门到精通</p>
+    <div class="hero-actions">
+      <a href="/problems" class="btn btn-primary btn-lg">进入题库</a>
+      <a href="/tags" class="btn btn-outline btn-lg">浏览标签</a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat-card"><span class="stat-number"><%= stats.problemCount %></span><span class="stat-label">题目</span></div>
+      <div class="stat-card"><span class="stat-number"><%= stats.solutionCount %></span><span class="stat-label">题解</span></div>
+      <div class="stat-card"><span class="stat-number"><%= stats.tagCount %></span><span class="stat-label">算法标签</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">最新题目</h2>
+      <a href="/problems" class="btn btn-sm btn-outline">查看全部 &rarr;</a>
+    </div>
+    <% if (recentProblems.length === 0) { %>
+    <div class="empty-state"><span class="empty-icon">📭</span><p>还没有题目，快去上传吧！</p></div>
+    <% } else { %>
+    <div class="problem-grid">
+      <% recentProblems.forEach(function(p) { %>
+      <a href="/problems/<%= p.id %>" class="problem-card">
+        <div class="card-header">
+          <h3 class="card-title"><%= p.title %></h3>
+          <span class="difficulty-badge difficulty-<%= p.difficulty.toLowerCase() %>"><%= p.difficulty === 'Easy' ? '简单' : p.difficulty === 'Medium' ? '中等' : '困难' %></span>
+        </div>
+        <p class="card-desc"><%= p.description.replace(/<[^>]*>/g, '').substring(0, 100) %>...</p>
+        <div class="card-tags">
+          <% const tNames = p.tag_names ? p.tag_names.split(',') : []; %>
+          <% const tColors = p.tag_colors ? p.tag_colors.split(',') : []; %>
+          <% for (let i = 0; i < Math.min(tNames.length, 4); i++) { %>
+          <span class="tag" style="background:<%= tColors[i] %>20;color:<%= tColors[i] %>;border:1px solid <%= tColors[i] %>40;"><%= tNames[i] %></span>
+          <% } %>
+          <% if (tNames.length > 4) { %><span class="tag tag-more">+<%= tNames.length - 4 %></span><% } %>
+        </div>
+      </a>
+      <% }); %>
+    </div>
+    <% } %>
+  </div>
+</section>
+
+<section class="section section-alt">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">算法标签</h2>
+      <a href="/tags" class="btn btn-sm btn-outline">查看全部 &rarr;</a>
+    </div>
+    <div class="tag-cloud">
+      <% tags.filter(function(t) { return t.problem_count > 0; }).forEach(function(t) { %>
+      <a href="/tags/<%= encodeURIComponent(t.name) %>" class="tag-cloud-item" style="background:<%= t.color %>15;color:<%= t.color %>;border-color:<%= t.color %>40;">
+        <%= t.name %> <span class="tag-count"><%= t.problem_count %></span>
+      </a>
+      <% }); %>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="features">
+      <div class="feature-card"><div class="feature-icon">📚</div><h3>分类学习</h3><p>按算法标签系统分类，从动态规划到图论，循序渐进掌握每种算法思想。</p></div>
+      <div class="feature-card"><div class="feature-icon">💻</div><h3>多语言题解</h3><p>每道题支持多语言版本的题解，在 C++、Python、Java 之间自由切换。</p></div>
+      <div class="feature-card"><div class="feature-icon">📖</div><h3>讲解+代码</h3><p>每道题解包含详细思路讲解和完整可运行代码。</p></div>
+      <div class="feature-card"><div class="feature-icon">👥</div><h3>共同贡献</h3><p>注册账号即可上传自己的题目和题解，一起建设算法题库。</p></div>
+    </div>
+  </div>
+</section>
+
+<%- include('partials/footer') %>

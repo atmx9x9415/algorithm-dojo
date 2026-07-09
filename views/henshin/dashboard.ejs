@@ -1,0 +1,98 @@
+<%- include('../partials/header', { title: '管理面板' }) %>
+<section class="section"><div class="container">
+<div class="admin-header">
+  <div class="admin-header-left">
+    <h1 class="page-title"><%= isAdmin ? '管理员面板' : '我的管理面板' %></h1>
+    <p>欢迎，<strong><%= userEmail %></strong>！<a href="/henshin/logout" class="admin-logout-link">退出登录</a></p>
+  </div>
+  <div class="admin-stats-mini">
+    <span class="stat-badge">📝 <%= problems.length %> 题</span>
+    <span class="stat-badge">🏷️ <%= tags.length %> 标签</span>
+  </div>
+</div>
+
+<div class="admin-actions">
+  <a href="/henshin/problems/new" class="btn btn-primary">+ 添加题目</a>
+  <a href="/henshin/tags" class="btn btn-outline" id="btnNewTag">+ 新建标签</a>
+</div>
+
+<% if (problems.length === 0) { %>
+<div class="empty-state"><span class="empty-icon">📭</span><p>还没有题目，<a href="/henshin/problems/new">去添加第一道吧</a>！</p></div>
+<% } else { %>
+<div class="admin-table-wrapper">
+  <h2><%= isAdmin ? '全部题目' : '我的题目' %></h2>
+  <div class="admin-table-scroll">
+    <table class="admin-table">
+      <thead><tr><th>ID</th><th>标题</th><th>难度</th><th>标签</th><th>作者</th><th>时间</th><th>操作</th></tr></thead>
+      <tbody>
+        <% problems.forEach(function(p) { %>
+        <tr>
+          <td><%= p.id %></td>
+          <td class="td-title"><a href="/problems/<%= p.id %>"><%= p.title %></a></td>
+          <td><span class="difficulty-badge difficulty-<%= p.difficulty.toLowerCase() %>"><%= p.difficulty === 'Easy' ? '简单' : p.difficulty === 'Medium' ? '中等' : '困难' %></span></td>
+          <td>
+            <% const tNames = p.tag_names || []; const tColors = p.tag_colors || []; %>
+            <% for (let i = 0; i < tNames.length; i++) { %>
+            <span class="tag tag-sm" style="background:<%= tColors[i] %>20;color:<%= tColors[i] %>;border:1px solid <%= tColors[i] %>40;"><%= tNames[i] %></span>
+            <% } %>
+          </td>
+          <td class="td-author"><%= p.author_email || '未知' %></td>
+          <td><%= p.created_at %></td>
+          <td class="td-actions">
+            <a href="/henshin/problems/<%= p.id %>/edit" class="btn btn-sm btn-outline">编辑</a>
+            <a href="/henshin/problems/<%= p.id %>/solutions/new" class="btn btn-sm btn-outline">+题解</a>
+            <button class="btn btn-sm btn-danger-outline" onclick="deleteProblem(<%= p.id %>)">删除</button>
+          </td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+</div>
+<% } %>
+
+<% if (isAdmin) { %>
+<!-- 标签管理（仅管理员可见） -->
+<div class="admin-table-wrapper" style="margin-top:28px;">
+  <h2>🏷️ 标签管理</h2>
+  <div class="admin-table-scroll">
+    <table class="admin-table">
+      <thead><tr><th>ID</th><th>颜色</th><th>名称</th><th>题目数</th><th>操作</th></tr></thead>
+      <tbody>
+        <% tags.forEach(function(t) { %>
+        <tr>
+          <td><%= t.id %></td>
+          <td><span style="display:inline-block;width:20px;height:20px;border-radius:50%;background:<%= t.color %>;"></span></td>
+          <td style="font-weight:600;"><%= t.name %></td>
+          <td><%= t.problem_count %></td>
+          <td>
+            <button class="btn btn-sm btn-danger-outline" onclick="deleteTag(<%= t.id %>, '<%= t.name %>')">删除</button>
+          </td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+</div>
+<% } %>
+
+</div></section>
+
+<!-- 新建标签弹窗 -->
+<div class="modal-overlay" id="tagModal">
+  <div class="modal modal-sm"><div class="modal-header"><h3>新建标签</h3><button class="modal-close" onclick="closeModal('tagModal')">&times;</button></div>
+  <form id="tagForm" onsubmit="submitTag(event)">
+    <div class="form-group"><label for="tagName">标签名称</label><input type="text" id="tagName" class="form-input" maxlength="30" required></div>
+    <div class="form-group"><label for="tagColor">颜色</label><input type="color" id="tagColor" class="form-input form-color" value="#00b894"></div>
+    <div class="form-actions"><button type="button" class="btn btn-outline" onclick="closeModal('tagModal')">取消</button><button type="submit" class="btn btn-primary">创建</button></div>
+  </form></div>
+</div>
+
+<script>
+function deleteProblem(id) { if (!confirm('确定删除题目 #' + id + '？此操作不可撤销！')) return; fetch('/henshin/problems/' + id, { method: 'DELETE' }).then(function(r) { return r.json(); }).then(function(d) { if (d.error) { alert(d.error); } else { location.reload(); } }).catch(function(e) { alert('失败: ' + e.message); }); }
+function deleteTag(id, name) { if (!confirm('确定删除标签 "' + name + '"？相关题目的该标签也会被移除。')) return; fetch('/henshin/tags/' + id, { method: 'DELETE' }).then(function(r) { return r.json(); }).then(function(d) { if (d.error) { alert(d.error); } else { location.reload(); } }).catch(function(e) { alert('失败: ' + e.message); }); }
+var btnTag = document.getElementById('btnNewTag');
+if (btnTag) { btnTag.addEventListener('click', function(e) { e.preventDefault(); document.getElementById('tagName').value = ''; document.getElementById('tagColor').value = '#00b894'; openModal('tagModal'); }); }
+function submitTag(e) { e.preventDefault(); var name = document.getElementById('tagName').value.trim(); var color = document.getElementById('tagColor').value; if (!name) { alert('标签名不能为空'); return; } fetch('/henshin/tags', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: name, color: color }) }).then(function(r) { return r.json(); }).then(function(d) { if (d.error) { alert(d.error); } else { closeModal('tagModal'); location.reload(); } }).catch(function(e) { alert('失败: ' + e.message); }); }
+</script>
+<%- include('../partials/footer') %>

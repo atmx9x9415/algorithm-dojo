@@ -1,0 +1,29 @@
+<%- include('partials/header', { title: tagName + ' 相关题目' }) %>
+<section class="section"><div class="container">
+<nav class="breadcrumb"><a href="/">首页</a> <span>/</span> <a href="/tags">算法标签</a> <span>/</span> <span class="current"><%= tagName %></span></nav>
+<div class="page-header"><h1 class="page-title"><%= tagName %></h1><p class="page-desc">共 <%= problems.length %> 道相关题目</p></div>
+<% if (problems.length === 0) { %>
+<div class="empty-state"><span class="empty-icon">📭</span><p>该标签下还没有题目。</p></div>
+<% } else { %>
+<div class="problem-list">
+  <% problems.forEach(function(p) { %>
+  <a href="/problems/<%= p.id %>" class="problem-list-item">
+    <div class="pli-left"><span class="difficulty-badge difficulty-<%= p.difficulty.toLowerCase() %>"><%= p.difficulty === 'Easy' ? '简' : p.difficulty === 'Medium' ? '中' : '难' %></span></div>
+    <div class="pli-main">
+      <h3 class="pli-title"><%= p.title %></h3>
+      <p class="pli-desc"><%= (p.description || '').replace(/<[^>]*>/g, '').substring(0, 120) %>...</p>
+      <div class="pli-tags">
+        <% const tNames = p.tag_names ? p.tag_names.split(',') : []; const tColors = p.tag_colors ? p.tag_colors.split(',') : []; %>
+        <% for (let i = 0; i < tNames.length; i++) { %>
+        <span class="tag tag-sm" style="background:<%= tColors[i] %>20;color:<%= tColors[i] %>;border:1px solid <%= tColors[i] %>40;"><%= tNames[i] %></span>
+        <% } %>
+      </div>
+    </div>
+    <div class="pli-right"><span class="pli-arrow">&rarr;</span></div>
+  </a>
+  <% }); %>
+</div>
+<% } %>
+<div class="back-nav"><a href="/tags" class="btn btn-outline">&larr; 返回标签库</a></div>
+</div></section>
+<%- include('partials/footer') %>

@@ -1,0 +1,91 @@
+<%- include('../partials/header', { title: (editing ? '编辑题目' : '添加题目') }) %>
+<section class="section"><div class="container">
+<nav class="breadcrumb"><a href="/henshin/dashboard">管理面板</a> <span>/</span> <span class="current"><%= editing ? '编辑题目' : '添加题目' %></span></nav>
+
+<div class="page-header"><h1 class="page-title"><%= editing ? '编辑题目' : '添加新题目' %></h1><p class="page-desc"><%= editing ? '修改题目信息和题解' : '填写题目信息，分步完成' %></p></div>
+
+<% if (typeof error !== 'undefined' && error) { %><div class="alert alert-error"><%= error %></div><% } %>
+
+<form method="POST" action="/henshin/problems<%= editing ? '/' + problem.id : '' %>" class="problem-edit-form">
+
+  <!-- 第一步：基本信息 -->
+  <div class="form-step">
+    <div class="step-header"><span class="step-number">1</span><h2>基本信息</h2></div>
+    <div class="form-row">
+      <div class="form-group form-group-flex">
+        <label for="pTitle">题目名称 *</label>
+        <input type="text" id="pTitle" name="title" class="form-input form-input-lg" value="<%= editing ? problem.title : (typeof values !== 'undefined' && values.title ? values.title : '') %>" placeholder="例如：两数之和" maxlength="200" required>
+      </div>
+      <div class="form-row-split">
+        <div class="form-group">
+          <label for="pDifficulty">难度</label>
+          <select id="pDifficulty" name="difficulty" class="form-input">
+            <% const diffs = [{v:'Easy',l:'简单'},{v:'Medium',l:'中等'},{v:'Hard',l:'困难'}]; %>
+            <% const curDiff = editing ? problem.difficulty : (typeof values !== 'undefined' && values.difficulty ? values.difficulty : 'Medium'); %>
+            <% diffs.forEach(function(d) { %><option value="<%= d.v %>" <%= curDiff === d.v ? 'selected' : '' %>><%= d.l %></option><% }); %>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="pSource">来源（选填）</label>
+          <input type="text" id="pSource" name="source" class="form-input" value="<%= editing ? (problem.source || '') : (typeof values !== 'undefined' && values.source ? values.source : '') %>" placeholder="如 LeetCode 15" maxlength="200">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 第二步：题目描述 -->
+  <div class="form-step">
+    <div class="step-header"><span class="step-number">2</span><h2>题目描述</h2></div>
+    <p class="step-hint">支持 Markdown 格式。可以包含示例、约束条件等。</p>
+    <div class="form-group">
+      <textarea id="pDesc" name="description" class="form-input form-textarea form-textarea-lg" placeholder="## 题目描述&#10;&#10;给定一个整数数组...&#10;&#10;## 示例&#10;&#10;输入: nums = [2,7,11,15], target = 9&#10;输出: [0,1]&#10;&#10;## 约束&#10;&#10;- 2 &lt;= nums.length &lt;= 10^4" required><%= editing ? problem.description : (typeof values !== 'undefined' && values.description ? values.description : '') %></textarea>
+    </div>
+  </div>
+
+  <!-- 第三步：标签选择 -->
+  <div class="form-step">
+    <div class="step-header"><span class="step-number">3</span><h2>算法标签</h2></div>
+    <p class="step-hint">选择这道题涉及的算法（可多选）</p>
+    <div class="tag-checkboxes" id="tagCheckboxes">
+      <% const selIds = typeof selectedTagIds !== 'undefined' ? selectedTagIds : []; %>
+      <% tags.forEach(function(t) { %>
+      <label class="tag-checkbox">
+        <input type="checkbox" name="tags" value="<%= t.id %>" <%= selIds.includes(t.id) ? 'checked' : '' %>>
+        <span style="color:<%= t.color %>;"><%= t.name %></span>
+      </label>
+      <% }); %>
+    </div>
+  </div>
+
+  <!-- 第四步：题解（可选，也可以之后添加） -->
+  <div class="form-step">
+    <div class="step-header"><span class="step-number">4</span><h2>题解（可选）</h2></div>
+    <p class="step-hint">可以先保存题目，之后再添加题解。如需现在添加，请填写以下内容。</p>
+    <div class="form-group">
+      <label for="solLang">题解语言</label>
+      <select id="solLang" name="sol_language" class="form-input" style="max-width:200px;">
+        <option value="">暂不添加题解</option>
+        <option value="C++">C++</option>
+        <option value="Python">Python</option>
+        <option value="Java">Java</option>
+        <option value="JavaScript">JavaScript</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="solExplanation">思路讲解（支持 Markdown）</label>
+      <textarea id="solExplanation" name="sol_explanation" class="form-input form-textarea" rows="6" placeholder="## 解题思路&#10;&#10;1. 首先...&#10;&#10;## 复杂度分析&#10;&#10;- 时间复杂度: O(n)&#10;- 空间复杂度: O(1)"></textarea>
+    </div>
+    <div class="form-group">
+      <label for="solCode">完整代码</label>
+      <textarea id="solCode" name="sol_code" class="form-input form-textarea code-textarea" rows="12" placeholder="// 粘贴完整可运行代码..."></textarea>
+    </div>
+  </div>
+
+  <div class="form-actions form-actions-sticky">
+    <a href="/henshin/dashboard" class="btn btn-outline">取消</a>
+    <button type="submit" class="btn btn-primary btn-lg"><%= editing ? '保存修改' : '发布题目' %></button>
+  </div>
+</form>
+</div></section>
+
+<%- include('../partials/footer') %>

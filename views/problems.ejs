@@ -1,0 +1,37 @@
+<%- include('partials/header', { title: '题库' }) %>
+<section class="section"><div class="container">
+<div class="page-header"><h1 class="page-title">题库</h1><p class="page-desc">按算法标签浏览所有题目</p></div>
+<form class="search-bar" action="/problems" method="GET">
+  <input type="text" name="q" class="search-input" placeholder="搜索题目..." value="<%= query %>">
+  <button type="submit" class="btn btn-primary">搜索</button>
+  <% if (query) { %><a href="/problems" class="btn btn-outline">清除</a><% } %>
+</form>
+<div class="tag-filter"><span class="filter-label">快速筛选：</span>
+  <% tags.filter(function(t) { return t.problem_count > 0; }).forEach(function(t) { %>
+  <a href="/tags/<%= encodeURIComponent(t.name) %>" class="tag tag-filter-item" style="background:<%= t.color %>15;color:<%= t.color %>;border:1px solid <%= t.color %>40;"><%= t.name %> (<%= t.problem_count %>)</a>
+  <% }); %>
+</div>
+<% if (problems.length === 0) { %>
+<div class="empty-state"><span class="empty-icon">📭</span><p><%= query ? '没有找到匹配的题目' : '还没有题目' %></p></div>
+<% } else { %>
+<div class="problem-list">
+  <% problems.forEach(function(p) { %>
+  <a href="/problems/<%= p.id %>" class="problem-list-item">
+    <div class="pli-left"><span class="difficulty-badge difficulty-<%= p.difficulty.toLowerCase() %>"><%= p.difficulty === 'Easy' ? '简' : p.difficulty === 'Medium' ? '中' : '难' %></span></div>
+    <div class="pli-main">
+      <h3 class="pli-title"><%= p.title %></h3>
+      <p class="pli-desc"><%= (p.description || '').replace(/<[^>]*>/g, '').substring(0, 120) %>...</p>
+      <div class="pli-tags">
+        <% const tNames = p.tag_names ? p.tag_names.split(',') : []; const tColors = p.tag_colors ? p.tag_colors.split(',') : []; %>
+        <% for (let i = 0; i < tNames.length; i++) { %>
+        <span class="tag tag-sm" style="background:<%= tColors[i] %>20;color:<%= tColors[i] %>;border:1px solid <%= tColors[i] %>40;"><%= tNames[i] %></span>
+        <% } %>
+      </div>
+    </div>
+    <div class="pli-right"><span class="pli-arrow">&rarr;</span></div>
+  </a>
+  <% }); %>
+</div>
+<% } %>
+</div></section>
+<%- include('partials/footer') %>

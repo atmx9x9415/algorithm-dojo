@@ -1,0 +1,19 @@
+{
+  "name": "algorithm-dojo",
+  "version": "1.0.0",
+  "description": "算法道场 - 特摄风算法题解网站",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "ejs": "^3.1.10",
+    "express": "^4.21.0",
+    "express-rate-limit": "^7.4.0",
+    "express-session": "^1.18.0",
+    "helmet": "^7.1.0",
+    "marked": "^12.0.2"
+  }
+}
