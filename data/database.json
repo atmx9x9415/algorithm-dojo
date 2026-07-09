@@ -1,16 +1,5 @@
 {
-  "problems": [
-    {
-      "id": 1,
-      "title": "111",
-      "description": "111111",
-      "difficulty": "Medium",
-      "source": "111",
-      "author_id": 0,
-      "created_at": "2026-07-09T17:08:49.399Z",
-      "updated_at": "2026-07-09T17:08:49.399Z"
-    }
-  ],
+  "problems": [],
   "tags": [
     {
       "id": 1,
@@ -88,13 +77,21 @@
       "color": "#ff9800"
     }
   ],
-  "problem_tags": [
+  "problem_tags": [],
+  "solutions": [
     {
+      "id": 1,
       "problem_id": 1,
-      "tag_id": 15
+      "language": "C++",
+      "version": "11",
+      "explanation": "1111",
+      "code": "111",
+      "template": "111",
+      "author_id": 0,
+      "created_at": "2026-07-09T17:09:12.658Z",
+      "updated_at": "2026-07-09T17:09:12.658Z"
     }
   ],
-  "solutions": [],
   "users": [
     {
       "id": 1,
@@ -105,9 +102,9 @@
     }
   ],
   "nextId": {
-    "problems": 2,
+    "problems": 1,
     "tags": 16,
-    "solutions": 1,
+    "solutions": 2,
     "users": 2
   }
 }
