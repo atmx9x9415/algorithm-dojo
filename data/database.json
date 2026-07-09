@@ -1,0 +1,97 @@
+{
+  "problems": [],
+  "tags": [
+    {
+      "id": 1,
+      "name": "动态规划",
+      "color": "#e74c3c"
+    },
+    {
+      "id": 2,
+      "name": "贪心",
+      "color": "#f39c12"
+    },
+    {
+      "id": 3,
+      "name": "二分查找",
+      "color": "#3498db"
+    },
+    {
+      "id": 4,
+      "name": "DFS/BFS",
+      "color": "#9b59b6"
+    },
+    {
+      "id": 5,
+      "name": "字符串",
+      "color": "#1abc9c"
+    },
+    {
+      "id": 6,
+      "name": "数学",
+      "color": "#e67e22"
+    },
+    {
+      "id": 7,
+      "name": "数据结构",
+      "color": "#2ecc71"
+    },
+    {
+      "id": 8,
+      "name": "图论",
+      "color": "#e91e63"
+    },
+    {
+      "id": 9,
+      "name": "排序",
+      "color": "#00bcd4"
+    },
+    {
+      "id": 10,
+      "name": "双指针",
+      "color": "#795548"
+    },
+    {
+      "id": 11,
+      "name": "位运算",
+      "color": "#607d8b"
+    },
+    {
+      "id": 12,
+      "name": "回溯",
+      "color": "#ff5722"
+    },
+    {
+      "id": 13,
+      "name": "滑动窗口",
+      "color": "#009688"
+    },
+    {
+      "id": 14,
+      "name": "前缀和",
+      "color": "#673ab7"
+    },
+    {
+      "id": 15,
+      "name": "并查集",
+      "color": "#ff9800"
+    }
+  ],
+  "problem_tags": [],
+  "solutions": [],
+  "users": [
+    {
+      "id": 1,
+      "email": "admin@dojo.local",
+      "password_hash": "$2a$12$6DYEkwou6/yGhMHr4/wX3.ToUa4VR3O0TdaXcwoiUrU2EifRJAaYW",
+      "is_admin": true,
+      "created_at": "2026-07-09 21:14:24"
+    }
+  ],
+  "nextId": {
+    "problems": 1,
+    "tags": 16,
+    "solutions": 1,
+    "users": 2
+  }
+}

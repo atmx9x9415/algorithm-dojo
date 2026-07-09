@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>算法道场 Algorithm Dojo</title>
+  <script>
+    // GitHub Pages SPA fallback: convert path to hash and redirect to index
+    var path = window.location.pathname.replace(/\/algorithm-dojo\/?/, '');
+    if (path) {
+      window.location.replace(window.location.origin + '/algorithm-dojo/#/' + path);
+    } else {
+      window.location.replace(window.location.origin + '/algorithm-dojo/');
+    }
+  </script>
+</head>
+<body>
+  <p>重定向中...</p>
+</body>
+</html>
