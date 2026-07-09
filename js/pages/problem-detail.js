@@ -55,20 +55,35 @@ async function renderProblemDetail(params) {
       const explanationHtml = activeSolution.explanation
         ? marked.parse(activeSolution.explanation)
         : '<p>暂无讲解</p>';
+      const hasTemplate = activeSolution.template && activeSolution.template.trim();
+      const isAdmin = DB.isLoggedIn();
       solutionHtml = `
         <div class="solution-card">
           <div class="solution-meta">
             <span class="solution-lang">${langIcon(activeSolution.language)} ${escapeHtml(activeSolution.language)}</span>
-            <span>${escapeHtml(activeSolution.author_email)} · ${formatDate(activeSolution.updated_at || activeSolution.created_at)}</span>
+            ${activeSolution.version ? '<span class="tag tag-sm" style="margin-left:8px;">' + escapeHtml(activeSolution.version) + '</span>' : ''}
+            <span>${escapeHtml(activeSolution.author_email || '未知')} · ${formatDate(activeSolution.updated_at || activeSolution.created_at)}</span>
+            ${isAdmin ? '<span style="margin-left:auto;display:flex;gap:6px;">' +
+              '<a href="#/admin/solutions/' + activeSolution.id + '/edit" class="btn btn-sm btn-outline">编辑题解</a>' +
+              '<button class="btn btn-sm btn-danger-outline" onclick="deleteSolution(' + activeSolution.id + ', ' + id + ')">删除</button>' +
+            '</span>' : ''}
           </div>
           <div class="solution-explanation">
             <h3>思路讲解</h3>
             <div class="markdown-content">${explanationHtml}</div>
           </div>
+          ${hasTemplate ? `
+          <div class="solution-code" style="margin-bottom:16px;">
+            <div class="code-header">
+              <h3>📝 作答模板</h3>
+              <button class="btn btn-sm btn-outline copy-btn" onclick="copyCode(this)" data-code="${escapeHtml(activeSolution.template || '').replace(/"/g, '&quot;')}">复制代码</button>
+            </div>
+            <pre><code class="language-${escapeHtml((activeSolution.language || 'cpp').toLowerCase())}">${escapeHtml(activeSolution.template || '')}</code></pre>
+          </div>` : ''}
           <div class="solution-code">
             <div class="code-header">
-              <h3>完整代码</h3>
-              <button class="btn btn-sm btn-outline copy-btn" onclick="copyCode(this)" data-code="${escapeHtml(activeSolution.code).replace(/"/g, '&quot;')}">复制代码</button>
+              <h3>✅ 解答代码</h3>
+              <button class="btn btn-sm btn-outline copy-btn" onclick="copyCode(this)" data-code="${escapeHtml(activeSolution.code || '').replace(/"/g, '&quot;')}">复制代码</button>
             </div>
             <pre><code class="language-${escapeHtml((activeSolution.language || 'cpp').toLowerCase())}">${escapeHtml(activeSolution.code || '')}</code></pre>
           </div>
@@ -99,6 +114,12 @@ async function renderProblemDetail(params) {
             }).join('')}
           </div>
           <p class="problem-author">贡献者：${escapeHtml(problem.author_email || '未知')}</p>
+          ${DB.isLoggedIn() ? `
+          <div style="margin-top:12px;display:flex;gap:8px;">
+            <a href="#/admin/problems/${id}/edit" class="btn btn-sm btn-outline">✏️ 编辑题目</a>
+            <a href="#/admin/solutions/${id}/new" class="btn btn-sm btn-primary">+ 添加题解</a>
+            <button class="btn btn-sm btn-danger-outline" onclick="deleteProblemFromDetail(${id})">🗑️ 删除题目</button>
+          </div>` : ''}
         </div>
 
         <div class="problem-body">
@@ -145,4 +166,33 @@ function copyCode(btn) {
     btn.textContent = '已复制!';
     setTimeout(function() { btn.textContent = '复制代码'; }, 2000);
   });
+}
+
+async function deleteSolution(solutionId, problemId) {
+  if (!confirm('确定删除此题解？')) return;
+  try {
+    var db = await DB.load();
+    db.solutions = (db.solutions || []).filter(function(s) { return s.id !== solutionId; });
+    await DB.save(db);
+    showToast('✅ 题解已删除', 'success');
+    DB.clearCache();
+    window.location.hash = '#/problems/' + problemId;
+  } catch (e) {
+    showToast('❌ ' + e.message, 'error');
+  }
+}
+
+async function deleteProblemFromDetail(id) {
+  if (!confirm('确定删除题目 #' + id + '？此操作不可撤销，所有题解也将被删除！')) return;
+  try {
+    var db = await DB.load();
+    db.problems = (db.problems || []).filter(function(p) { return p.id !== id; });
+    db.problem_tags = (db.problem_tags || []).filter(function(pt) { return pt.problem_id !== id; });
+    db.solutions = (db.solutions || []).filter(function(s) { return s.problem_id !== id; });
+    await DB.save(db);
+    showToast('✅ 题目已删除', 'success');
+    window.location.hash = '#/problems';
+  } catch (e) {
+    showToast('❌ ' + e.message, 'error');
+  }
 }

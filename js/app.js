@@ -85,8 +85,8 @@
   route('/admin/dashboard', renderDashboard);
   route('/admin/problems/new', renderProblemForm);
   route('/admin/problems/:id/edit', renderProblemForm);
-  route('/admin/solutions/:problemId/new', renderSolutionForm);
-  route('/admin/solutions/:id/edit', renderSolutionForm);
+  route('/admin/solutions/:problemId/new', function(params) { renderSolutionForm(params, 'new'); });
+  route('/admin/solutions/:id/edit', function(params) { renderSolutionForm(params, 'edit'); });
 
   // --- 登出 ---
   route('/admin/logout', function() {
