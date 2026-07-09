@@ -19,6 +19,16 @@
       "author_id": 0,
       "created_at": "2026-07-10 01:20:42",
       "updated_at": "2026-07-10 01:20:42"
+    },
+    {
+      "id": 3,
+      "title": "3333",
+      "description": "333",
+      "difficulty": "Medium",
+      "source": "3333",
+      "author_id": 0,
+      "created_at": "2026-07-10 01:24:42",
+      "updated_at": "2026-07-10 01:24:42"
     }
   ],
   "tags": [
@@ -106,6 +116,10 @@
     {
       "problem_id": 2,
       "tag_id": 15
+    },
+    {
+      "problem_id": 3,
+      "tag_id": 1
     }
   ],
   "solutions": [
@@ -132,7 +146,7 @@
     }
   ],
   "nextId": {
-    "problems": 3,
+    "problems": 4,
     "tags": 16,
     "solutions": 2,
     "users": 2
