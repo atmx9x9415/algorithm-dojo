@@ -1,5 +1,16 @@
 {
-  "problems": [],
+  "problems": [
+    {
+      "id": 1,
+      "title": "he",
+      "description": "hehe",
+      "difficulty": "Medium",
+      "source": "",
+      "author_id": 0,
+      "created_at": "2026-07-09T17:07:18.146Z",
+      "updated_at": "2026-07-09T17:07:18.146Z"
+    }
+  ],
   "tags": [
     {
       "id": 1,
@@ -77,7 +88,12 @@
       "color": "#ff9800"
     }
   ],
-  "problem_tags": [],
+  "problem_tags": [
+    {
+      "problem_id": 1,
+      "tag_id": 15
+    }
+  ],
   "solutions": [],
   "users": [
     {
@@ -89,7 +105,7 @@
     }
   ],
   "nextId": {
-    "problems": 1,
+    "problems": 2,
     "tags": 16,
     "solutions": 1,
     "users": 2
