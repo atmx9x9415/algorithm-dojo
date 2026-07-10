@@ -197,16 +197,35 @@ app.get('*', (req, res) => {
 
 // ==================== 启动服务器 ====================
 
+const fs = require('fs');
+
 async function start() {
   await getDb();
-  ensureAdmin();
+
+  // 首次启动：如果数据库为空，自动从 data/database.json 导入种子数据
+  const db = exportDb();
+  if ((!db.problems || db.problems.length === 0) && (!db.tags || db.tags.length === 0)) {
+    const seedPath = path.join(__dirname, 'data', 'database.json');
+    if (fs.existsSync(seedPath)) {
+      try {
+        const raw = fs.readFileSync(seedPath, 'utf-8');
+        const data = JSON.parse(raw);
+        importDb(data);
+        console.log('[Seed] 自动导入种子数据: ' + (data.problems || []).length + ' 题, ' + (data.tags || []).length + ' 标签');
+      } catch (e) {
+        console.log('[Seed] 导入失败，使用空数据库: ' + e.message);
+      }
+    }
+  }
+
+  ensureAdmin(true); // 强制重置管理员密码确保可登录
+  saveToDisk();
 
   app.listen(PORT, () => {
     console.log('╔══════════════════════════════════════╗');
     console.log('║   📖 算法道场 Algorithm Dojo       ║');
     console.log('║   服务器已启动                      ║');
-    console.log('║   地址: http://localhost:' + String(PORT).padEnd(13) + '║');
-    console.log('║   管理: http://localhost:' + String(PORT).padEnd(7) + '#/admin ║');
+    console.log('║   端口: ' + String(PORT).padEnd(27) + '║');
     console.log('╚══════════════════════════════════════╝');
     console.log('');
     console.log('[Server] 默认管理员: admin@dojo.local / admin123');
