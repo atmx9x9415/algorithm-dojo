@@ -1,9 +1,10 @@
 /**
- * 管理员登录/认证
+ * 管理员登录/认证 - 用户名密码登录
  */
 async function renderAdminLogin() {
-  // 已登录则跳转仪表盘
-  if (DB.isLoggedIn()) {
+  // 先检查是否已登录
+  var loggedIn = await DB.checkAuth();
+  if (loggedIn) {
     window.location.hash = '#/admin/dashboard';
     return;
   }
@@ -14,27 +15,30 @@ async function renderAdminLogin() {
         <div style="text-align:center;margin-bottom:24px;">
           <h1 style="font-size:1.8rem;">🔐 管理员登录</h1>
           <p style="color:var(--text-light);margin-top:8px;">
-            输入你的 <strong>GitHub Personal Access Token</strong> 来管理内容
+            请输入管理员账号和密码
           </p>
         </div>
 
         <div class="alert alert-info" style="margin-bottom:16px;">
-          <p><strong>如何获取 Token？</strong></p>
-          <ol style="margin:8px 0 0 16px;font-size:0.9rem;">
-            <li>打开 <a href="https://github.com/settings/tokens/new" target="_blank">GitHub Token 设置</a></li>
-            <li>Note 填 <code>algorithm-dojo</code></li>
-            <li>勾选 <strong>repo</strong>（全部子项）</li>
-            <li>点击 Generate token，复制结果</li>
-          </ol>
+          <p><strong>默认管理员账号</strong></p>
+          <p style="font-size:0.9rem;margin-top:4px;">
+            邮箱：<code>admin@dojo.local</code><br>
+            密码：<code>admin123</code><br>
+            <span style="color:var(--accent-red);">⚠️ 首次登录后请立即修改密码！</span>
+          </p>
         </div>
 
         <form onsubmit="handleLogin(event)" style="display:flex;flex-direction:column;gap:12px;">
           <div class="form-group">
-            <label for="ghToken">GitHub Token</label>
-            <input type="password" id="ghToken" class="form-input" placeholder="ghp_xxxxxxxxxxxx" required autofocus>
+            <label for="loginEmail">管理员邮箱</label>
+            <input type="email" id="loginEmail" class="form-input" placeholder="admin@dojo.local" required autofocus autocomplete="email">
+          </div>
+          <div class="form-group">
+            <label for="loginPassword">密码</label>
+            <input type="password" id="loginPassword" class="form-input" placeholder="请输入密码" required autocomplete="current-password">
           </div>
           <p id="loginError" style="color:var(--accent-red);font-size:0.9rem;display:none;"></p>
-          <button type="submit" class="btn btn-primary btn-lg" style="width:100%;">验证并登录</button>
+          <button type="submit" class="btn btn-primary btn-lg" style="width:100%;" id="btnLogin">登录</button>
         </form>
 
         <div style="text-align:center;margin-top:16px;">
@@ -47,23 +51,33 @@ async function renderAdminLogin() {
 
 async function handleLogin(e) {
   e.preventDefault();
-  var token = document.getElementById('ghToken').value.trim();
+  var email = document.getElementById('loginEmail').value.trim();
+  var password = document.getElementById('loginPassword').value;
   var errEl = document.getElementById('loginError');
+  var btn = document.getElementById('btnLogin');
 
-  if (!token) {
-    errEl.textContent = '请输入 Token';
+  if (!email) {
+    errEl.textContent = '请输入邮箱';
+    errEl.style.display = 'block';
+    return;
+  }
+  if (!password) {
+    errEl.textContent = '请输入密码';
     errEl.style.display = 'block';
     return;
   }
 
-  // 验证 Token
-  var result = await DB.verifyToken(token);
+  btn.disabled = true;
+  btn.textContent = '登录中...';
+
+  var result = await DB.login(email, password);
   if (result.valid) {
-    DB.setToken(token);
     showToast('✅ 登录成功！欢迎 ' + result.user, 'success');
     window.location.hash = '#/admin/dashboard';
   } else {
-    errEl.textContent = '❌ ' + (result.error || 'Token 无效');
+    errEl.textContent = '❌ ' + (result.error || '登录失败');
     errEl.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = '登录';
   }
 }

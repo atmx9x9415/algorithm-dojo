@@ -89,8 +89,8 @@
   route('/admin/solutions/:id/edit', function(params) { renderSolutionForm(params, 'edit'); });
 
   // --- 登出 ---
-  route('/admin/logout', function() {
-    DB.clearToken();
+  route('/admin/logout', async function() {
+    await DB.logout();
     DB.clearCache();
     window.location.hash = '#/';
   });

@@ -1,0 +1,17 @@
+{
+  "name": "algorithm-dojo",
+  "version": "1.0.0",
+  "description": "算法道场 - 算法题解学习平台",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "seed": "node seed.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "express": "^4.21.0",
+    "express-session": "^1.18.0",
+    "sql.js": "^1.12.0"
+  }
+}

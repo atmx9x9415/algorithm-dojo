@@ -20,8 +20,9 @@ async function renderDashboard() {
           <div class="admin-header-left">
             <h1 class="page-title">管理面板</h1>
             <p>
-              <strong>Token 已认证</strong>
+              <strong>管理员已登录</strong>
               <a href="#/admin/logout" class="admin-logout-link" style="margin-left:12px;">退出登录</a>
+              <a href="javascript:void(0)" onclick="showChangePassword()" style="margin-left:12px;font-size:0.85rem;">🔑 修改密码</a>
             </p>
           </div>
           <div class="admin-stats-mini">
@@ -35,11 +36,7 @@ async function renderDashboard() {
           <a href="#/admin/problems/new" class="btn btn-primary">+ 添加题目</a>
           <button class="btn btn-outline" onclick="showAddTag()">+ 新建标签</button>
           <button class="btn btn-outline" onclick="refreshDashboard()">🔄 刷新</button>
-          <button class="btn btn-outline" onclick="testAPIConnection()" id="btnTestAPI">🔧 测试 API</button>
         </div>
-
-        <!-- API 测试结果区 -->
-        <div id="testResults" style="display:none;margin-bottom:16px;"></div>
 
         ${problems.length === 0 ? '<div class="empty-state"><span class="empty-icon">📭</span><p>还没有题目，<a href="#/admin/problems/new">去添加第一道吧</a>！</p></div>' : `
         <div class="admin-table-wrapper">
@@ -92,13 +89,12 @@ async function renderDashboard() {
           </div>
         </div>
 
-        <!-- 手动保存按钮 -->
+        <!-- 修改密码弹窗 -->
         <div style="margin-top:24px;padding:16px;background:var(--bg-alt);border-radius:var(--radius);text-align:center;">
           <p style="font-size:0.85rem;color:var(--text-light);margin-bottom:8px;">
-            ⚠️ 如果自动保存失败，先用下方按钮手动保存当前数据
+            🔑 安全提示：请定期修改管理员密码
           </p>
-          <button class="btn btn-primary" onclick="manualSave()" id="btnManualSave">💾 手动保存数据</button>
-          <span id="saveStatus" style="margin-left:12px;font-size:0.9rem;"></span>
+          <button class="btn btn-outline" onclick="showChangePassword()">🔑 修改密码</button>
         </div>
       </div>
     </section>
@@ -111,141 +107,65 @@ async function renderDashboard() {
   }, 100);
 }
 
-// ==================== 手动保存 ====================
-async function manualSave() {
-  var btn = document.getElementById('btnManualSave');
-  var status = document.getElementById('saveStatus');
-  btn.disabled = true;
-  btn.textContent = '⏳ 保存中...';
-  status.textContent = '';
-  status.style.color = '';
+// ==================== 修改密码 ====================
 
-  try {
-    var db = await DB.load(true); // 强制刷新
-    status.textContent = '已加载最新数据，正在保存...';
-    var ok = await DB.save(db);
-    if (ok) {
-      status.textContent = '✅ 保存成功！';
-      status.style.color = 'var(--primary)';
-      btn.textContent = '💾 手动保存数据';
-      btn.disabled = false;
-      showToast('✅ 数据已保存到 GitHub', 'success');
-    }
-  } catch (e) {
-    status.textContent = '❌ ' + e.message;
-    status.style.color = 'var(--accent-red)';
-    btn.textContent = '💾 重试保存';
-    btn.disabled = false;
-    showToast('❌ 保存失败: ' + e.message, 'error');
-  }
+function showChangePassword() {
+  var modal = document.getElementById('globalModal');
+  var title = document.getElementById('globalModalTitle');
+  var body = document.getElementById('globalModalBody');
+  title.textContent = '🔑 修改管理员密码';
+  body.innerHTML = `
+    <form onsubmit="submitChangePassword(event)" style="display:flex;flex-direction:column;gap:12px;">
+      <div class="form-group">
+        <label for="currentPwd">当前密码</label>
+        <input type="password" id="currentPwd" class="form-input" required autofocus>
+      </div>
+      <div class="form-group">
+        <label for="newPwd">新密码（至少6位）</label>
+        <input type="password" id="newPwd" class="form-input" minlength="6" required>
+      </div>
+      <div class="form-group">
+        <label for="confirmPwd">确认新密码</label>
+        <input type="password" id="confirmPwd" class="form-input" minlength="6" required>
+      </div>
+      <p id="changePwdError" style="color:var(--accent-red);font-size:0.9rem;display:none;"></p>
+      <div class="form-actions">
+        <button type="button" class="btn btn-outline" onclick="closeModal('globalModal')">取消</button>
+        <button type="submit" class="btn btn-primary">修改密码</button>
+      </div>
+    </form>
+  `;
+  openModal('globalModal');
 }
 
-// ==================== API 诊断 ====================
-async function testAPIConnection() {
-  var resultDiv = document.getElementById('testResults');
-  resultDiv.style.display = 'block';
-  resultDiv.innerHTML = '<div class="alert alert-info">🔍 正在测试 API 连接...</div>';
+async function submitChangePassword(e) {
+  e.preventDefault();
+  var errEl = document.getElementById('changePwdError');
+  errEl.style.display = 'none';
 
-  var results = [];
-  var token = DB.getToken();
+  var currentPwd = document.getElementById('currentPwd').value;
+  var newPwd = document.getElementById('newPwd').value;
+  var confirmPwd = document.getElementById('confirmPwd').value;
 
-  // Test 1: Token
-  results.push('<h3>📋 API 诊断报告</h3>');
-  results.push('<p><strong>Token:</strong> ' + token.substring(0, 8) + '...' + token.substring(token.length - 4) + '</p>');
-
-  // Test 2: Verify user
-  try {
-    var userRes = await fetch('https://api.github.com/user', {
-      headers: { 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github.v3+json' }
-    });
-    if (userRes.ok) {
-      var user = await userRes.json();
-      results.push('<p style="color:green;">✅ 用户验证: ' + user.login + '</p>');
-    } else {
-      results.push('<p style="color:red;">❌ 用户验证失败: HTTP ' + userRes.status + '</p>');
-    }
-  } catch(e) {
-    results.push('<p style="color:red;">❌ 用户验证异常: ' + e.message + '</p>');
+  if (newPwd !== confirmPwd) {
+    errEl.textContent = '两次输入的新密码不一致';
+    errEl.style.display = 'block';
+    return;
+  }
+  if (newPwd.length < 6) {
+    errEl.textContent = '新密码至少 6 位';
+    errEl.style.display = 'block';
+    return;
   }
 
-  // Test 3: Verify repo access
-  try {
-    var repoRes = await fetch('https://api.github.com/repos/atmx9x9415/algorithm-dojo', {
-      headers: { 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github.v3+json' }
-    });
-    if (repoRes.ok) {
-      var repo = await repoRes.json();
-      results.push('<p style="color:green;">✅ 仓库访问: ' + repo.full_name + ' (权限: ' + (repo.permissions ? (repo.permissions.push ? '可写' : '只读') : '未知') + ')</p>');
-    } else {
-      results.push('<p style="color:red;">❌ 仓库访问失败: HTTP ' + repoRes.status + '</p>');
-    }
-  } catch(e) {
-    results.push('<p style="color:red;">❌ 仓库访问异常: ' + e.message + '</p>');
+  var result = await DB.changePassword(currentPwd, newPwd);
+  if (result.success) {
+    closeModal('globalModal');
+    showToast('✅ ' + result.message, 'success');
+  } else {
+    errEl.textContent = '❌ ' + (result.error || '修改失败');
+    errEl.style.display = 'block';
   }
-
-  // Test 4: Get file SHA
-  var sha = null;
-  try {
-    var apiUrl = 'https://api.github.com/repos/atmx9x9415/algorithm-dojo/contents/data/database.json?ref=main';
-    var fileRes = await fetch(apiUrl, {
-      headers: { 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github.v3+json' }
-    });
-    if (fileRes.ok) {
-      var fileInfo = await fileRes.json();
-      sha = fileInfo.sha;
-      results.push('<p style="color:green;">✅ 获取文件 SHA: ' + sha.substring(0, 10) + '... (大小: ' + fileInfo.size + ' bytes)</p>');
-    } else {
-      var err = await fileRes.json().catch(function() { return {}; });
-      results.push('<p style="color:red;">❌ 获取文件失败: HTTP ' + fileRes.status + ' - ' + (err.message || '') + '</p>');
-    }
-  } catch(e) {
-    results.push('<p style="color:red;">❌ 获取文件异常: ' + e.message + '</p>');
-  }
-
-  // Test 5: Try a minimal PUT (add a test field)
-  if (sha) {
-    try {
-      var testDb = await DB.load(true);
-      var content = JSON.stringify(testDb, null, 2);
-      var bytes = new TextEncoder().encode(content);
-      var binary = '';
-      for (var i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
-      var base64 = btoa(binary);
-
-      var putBody = {
-        message: 'API test [Algorithm Dojo]',
-        content: base64,
-        sha: sha,
-        branch: 'main'
-      };
-
-      var putRes = await fetch(apiUrl, {
-        method: 'PUT',
-        headers: {
-          'Authorization': 'token ' + token,
-          'Accept': 'application/vnd.github.v3+json',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(putBody)
-      });
-
-      if (putRes.ok) {
-        var putResult = await putRes.json();
-        results.push('<p style="color:green;font-weight:bold;">✅ PUT 写入成功！新 SHA: ' + (putResult.content.sha || '').substring(0, 10) + '...</p>');
-      } else {
-        var putErr = await putRes.json().catch(function() { return {}; });
-        results.push('<p style="color:red;font-weight:bold;">❌ PUT 写入失败: HTTP ' + putRes.status + '</p>');
-        results.push('<p style="color:red;">错误: ' + (putErr.message || '未知') + '</p>');
-        if (putErr.errors) {
-          results.push('<p style="color:red;">详情: ' + JSON.stringify(putErr.errors) + '</p>');
-        }
-      }
-    } catch(e) {
-      results.push('<p style="color:red;">❌ PUT 测试异常: ' + e.message + '</p>');
-    }
-  }
-
-  resultDiv.innerHTML = '<div style="background:var(--surface);padding:16px;border-radius:var(--radius);border:1px solid var(--border);">' + results.join('') + '</div>';
 }
 
 // ==================== Dashboard 操作 ====================
